@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.xeiam.xchange.mtgox.v0.dto.trade;
+package com.xeiam.xchange.bitcoincentral.dto.marketdata;
 
 import java.util.List;
 
@@ -28,29 +28,37 @@ import org.codehaus.jackson.annotate.JsonProperty;
 /**
  * @author timmolter
  */
-public final class MtGoxCancelOrder {
+public final class BitcoinCentralDepth {
 
-  private final List<MtGoxOrders> orders;
+  private final List<BidAsk> asks;
+  private final List<BidAsk> bids;
 
   /**
    * Constructor
    * 
-   * @param orders
+   * @param asks
+   * @param bids
    */
-  public MtGoxCancelOrder(@JsonProperty("orders") List<MtGoxOrders> orders) {
+  public BitcoinCentralDepth(@JsonProperty("asks") List<BidAsk> asks, @JsonProperty("bids") List<BidAsk> bids) {
 
-    this.orders = orders;
+    this.asks = asks;
+    this.bids = bids;
   }
 
-  public List<MtGoxOrders> getOrders() {
+  public List<BidAsk> getAsks() {
 
-    return this.orders;
+    return this.asks;
+  }
+
+  public List<BidAsk> getBids() {
+
+    return this.bids;
   }
 
   @Override
   public String toString() {
 
-    return "MtGoxCancelOrder [orders=" + orders + "]";
+    return "BitcoinCentralDepth [asks=" + asks.toString() + ", bids=" + bids.toString() + "]";
   }
 
 }

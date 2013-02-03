@@ -19,38 +19,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.xeiam.xchange.mtgox.v0.dto.trade;
+package com.xeiam.xchange.bitcoincentral.dto.marketdata;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @author timmolter
  */
-public final class MtGoxCancelOrder {
+public final class BidAsk {
 
-  private final List<MtGoxOrders> orders;
+  private final BigDecimal amount;
+  private final String currency;
+  private final BigDecimal price;
+  private final BigDecimal timestamp;
 
   /**
    * Constructor
    * 
-   * @param orders
+   * @param amount
+   * @param currency
+   * @param price
+   * @param timestamp
    */
-  public MtGoxCancelOrder(@JsonProperty("orders") List<MtGoxOrders> orders) {
+  public BidAsk(@JsonProperty("amount") BigDecimal amount, @JsonProperty("currency") String currency, @JsonProperty("price") BigDecimal price, @JsonProperty("timestamp") BigDecimal timestamp) {
 
-    this.orders = orders;
+    this.amount = amount;
+    this.currency = currency;
+    this.price = price;
+    this.timestamp = timestamp;
   }
 
-  public List<MtGoxOrders> getOrders() {
+  public BigDecimal getAmount() {
 
-    return this.orders;
+    return this.amount;
+  }
+
+  public String getCurrency() {
+
+    return this.currency;
+  }
+
+  public BigDecimal getPrice() {
+
+    return this.price;
+  }
+
+  public BigDecimal getTimestamp() {
+
+    return this.timestamp;
   }
 
   @Override
   public String toString() {
 
-    return "MtGoxCancelOrder [orders=" + orders + "]";
+    return "BidAsk [amount=" + amount + ", currency=" + currency + ", price=" + price + ", timestamp=" + timestamp + "]";
   }
 
 }

@@ -19,40 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.xeiam.xchange.mtgox.v0.service.trade;
+package com.xeiam.xchange.bitcoincentral.service.marketdata;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 
-import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
-import com.xeiam.xchange.mtgox.v0.dto.trade.MtGoxCancelOrder;
+import com.xeiam.xchange.bitcoincentral.dto.marketdata.BitcoinCentralTrade;
 
 /**
- * Test MtGoxCancelOrder JSON parsing
+ * Test Transaction[] JSON parsing
  */
-public class CancelOrdersJSONTest {
+public class TradesJSONTest {
 
   @Test
   public void testUnmarshal() throws IOException {
 
     // Read in the JSON from the example resources
-    InputStream is = CancelOrdersJSONTest.class.getResourceAsStream("/trade/example-cancel-order-response.json");
+    InputStream is = TradesJSONTest.class.getResourceAsStream("/marketdata/example-trades-data.json");
 
     // Use Jackson to parse it
     ObjectMapper mapper = new ObjectMapper();
-    mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    MtGoxCancelOrder mtGoxOpenOrders = mapper.readValue(is, MtGoxCancelOrder.class);
-
-    System.out.println(mtGoxOpenOrders.toString());
+    BitcoinCentralTrade[] bitcoinCentralTrades = mapper.readValue(is, BitcoinCentralTrade[].class);
 
     // Verify that the example data was unmarshalled correctly
-    assertThat(mtGoxOpenOrders.getOrders().get(0).getAmount(), equalTo(new BigDecimal("26.00000000")));
+    // assertThat(bitcoinCentralTrades[0].getCreatedAt(), is(equalTo("2011-07-05T00:12:07+02:00")));
+    assertThat(bitcoinCentralTrades[0].getCurrency(), is(equalTo("EUR")));
+    assertThat(bitcoinCentralTrades[0].getPpc(), is(equalTo(new BigDecimal("11.1"))));
+    assertThat(bitcoinCentralTrades[0].getTradedBtc(), is(equalTo(new BigDecimal("1.0"))));
+
+    // Trades trades = BitcoinCentralAdapters.adaptTrades(bitcoinCentralTrades, "EUR", "BTC");
+    // assertThat(trades.getTrades().get(0).getTimestamp().getTime(), is(equalTo(1309817527000L)));
+
   }
 }

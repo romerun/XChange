@@ -19,40 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.xeiam.xchange.mtgox.v0.service.trade;
+package com.xeiam.xchange.bitcoincentral.service.marketdata;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 
-import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
-import com.xeiam.xchange.mtgox.v0.dto.trade.MtGoxCancelOrder;
+import com.xeiam.xchange.bitcoincentral.dto.marketdata.BitcoinCentralDepth;
 
 /**
- * Test MtGoxCancelOrder JSON parsing
+ * Test MtGoxFullDepth JSON parsing
  */
-public class CancelOrdersJSONTest {
+public class FullDepthJSONTest {
 
   @Test
   public void testUnmarshal() throws IOException {
 
     // Read in the JSON from the example resources
-    InputStream is = CancelOrdersJSONTest.class.getResourceAsStream("/trade/example-cancel-order-response.json");
+    InputStream is = FullDepthJSONTest.class.getResourceAsStream("/marketdata/example-full-depth-data.json");
 
     // Use Jackson to parse it
     ObjectMapper mapper = new ObjectMapper();
-    mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    MtGoxCancelOrder mtGoxOpenOrders = mapper.readValue(is, MtGoxCancelOrder.class);
-
-    System.out.println(mtGoxOpenOrders.toString());
+    BitcoinCentralDepth bitcoinCentralDepth = mapper.readValue(is, BitcoinCentralDepth.class);
 
     // Verify that the example data was unmarshalled correctly
-    assertThat(mtGoxOpenOrders.getOrders().get(0).getAmount(), equalTo(new BigDecimal("26.00000000")));
+    assertThat("Unexpected Return Buy value", bitcoinCentralDepth.getAsks().size(), equalTo(24));
   }
 }
