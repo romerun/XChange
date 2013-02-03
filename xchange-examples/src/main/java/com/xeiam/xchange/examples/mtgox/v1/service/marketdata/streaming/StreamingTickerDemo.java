@@ -27,6 +27,7 @@ import com.xeiam.xchange.Exchange;
 import com.xeiam.xchange.ExchangeFactory;
 import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.dto.marketdata.Ticker;
+import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.mtgox.v1.MtGoxExchange;
 import com.xeiam.xchange.service.ExchangeEvent;
 import com.xeiam.xchange.service.ExchangeEventType;
@@ -46,7 +47,16 @@ public class StreamingTickerDemo {
   public void start() {
 
     // Use the default MtGox settings
-    Exchange mtGoxExchange = ExchangeFactory.INSTANCE.createExchange(MtGoxExchange.class.getName());
+    Exchange mtGoxExchange;
+    
+    for (;;) {
+      try {
+        mtGoxExchange = ExchangeFactory.INSTANCE.createExchange(MtGoxExchange.class.getName());
+        break;
+      } catch (Exception e) {
+        System.out.println(e);
+      }
+    }
 
     // Interested in the public streaming market data feed (no authentication)
     StreamingMarketDataService streamingMarketDataService = mtGoxExchange.getStreamingMarketDataService();
@@ -57,7 +67,7 @@ public class StreamingTickerDemo {
     try {
 
       // Run for a limited number of events
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 100; i++) {
 
         // Monitor the exchange events
         System.out.println("Waiting for exchange event...");
@@ -67,11 +77,19 @@ public class StreamingTickerDemo {
         if (exchangeEvent.getEventType() == ExchangeEventType.TICKER) {
 
           Ticker ticker = (Ticker) exchangeEvent.getPayload();
-          System.out.println("+ Ticker: " + ticker.toString());
+          System.err.println("+ Ticker: " + ticker.toString());
 
           // System.out.println("+ Ticker event: " + exchangeEvent.getPayload().toString());
         }
 
+        if (exchangeEvent.getEventType() == ExchangeEventType.TRADE) {
+
+          Trade trade = (Trade) exchangeEvent.getPayload();
+          System.err.println("+ Trade: " + trade.toString());
+
+          // System.out.println("+ Ticker event: " + exchangeEvent.getPayload().toString());
+        }
+        
       }
 
       // Disconnect and exit

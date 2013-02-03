@@ -70,7 +70,17 @@ public enum ExchangeEventType {
    * A message with a Ticker payload
    */
   TICKER,
+  
+  /**
+   * A message with a Ticker payload
+   */
+  TRADE,
 
+  /**
+   * A message with a Ticker payload
+   */
+  DEPTH
+  
   /* End of enum */
   ;
 

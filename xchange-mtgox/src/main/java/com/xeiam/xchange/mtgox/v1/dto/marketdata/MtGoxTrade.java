@@ -1,5 +1,6 @@
 package com.xeiam.xchange.mtgox.v1.dto.marketdata;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -8,6 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * </p>
  * Auto-generated using the simplest types possible with conversion delegated to the adapter
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class MtGoxTrade {
 
   private final double amount;

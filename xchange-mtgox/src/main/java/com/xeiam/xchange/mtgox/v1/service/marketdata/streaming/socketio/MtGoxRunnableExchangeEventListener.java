@@ -30,8 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import com.xeiam.xchange.ExchangeException;
 import com.xeiam.xchange.dto.marketdata.Ticker;
+import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.mtgox.v1.MtGoxAdapters;
 import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxTicker;
+import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxTrade;
 import com.xeiam.xchange.rest.JSONUtils;
 import com.xeiam.xchange.service.DefaultExchangeEvent;
 import com.xeiam.xchange.service.ExchangeEvent;
@@ -51,7 +53,7 @@ public class MtGoxRunnableExchangeEventListener extends RunnableExchangeEventLis
 
   private static final Logger log = LoggerFactory.getLogger(MtGoxRunnableExchangeEventListener.class);
 
-  private ObjectMapper tickerObjectMapper = new ObjectMapper();
+  private ObjectMapper objectMapper = new ObjectMapper();
 
   private final BlockingQueue<Ticker> tickerQueue;
   private final BlockingQueue<ExchangeEvent> eventQueue;
@@ -88,13 +90,13 @@ public class MtGoxRunnableExchangeEventListener extends RunnableExchangeEventLis
       log.debug("JSON message. Length=" + exchangeEvent.getData().length());
 
       // Get raw JSON
-      Map<String, Object> rawJSON = JSONUtils.getJsonGenericMap(exchangeEvent.getData(), tickerObjectMapper);
+      Map<String, Object> rawJSON = JSONUtils.getJsonGenericMap(exchangeEvent.getData(), objectMapper);
 
       // Determine what has been sent
       if (rawJSON.containsKey("ticker")) {
 
         // Get MtGoxTicker from JSON String
-        MtGoxTicker mtGoxTicker = JSONUtils.getJsonObject(JSONUtils.getJSONString(rawJSON.get("ticker"), tickerObjectMapper), MtGoxTicker.class, tickerObjectMapper);
+        MtGoxTicker mtGoxTicker = JSONUtils.getJsonObject(JSONUtils.getJSONString(rawJSON.get("ticker"), objectMapper), MtGoxTicker.class, objectMapper);
 
         // Adapt to XChange DTOs
         Ticker ticker = MtGoxAdapters.adaptTicker(mtGoxTicker);
@@ -105,6 +107,16 @@ public class MtGoxRunnableExchangeEventListener extends RunnableExchangeEventLis
         // Create a ticker event
         ExchangeEvent tickerEvent = new DefaultExchangeEvent(ExchangeEventType.TICKER, exchangeEvent.getData(), ticker);
         addToEventQueue(tickerEvent);
+      } else if (rawJSON.containsKey("trade")) {
+
+        // Get MtGoxTicker from JSON String
+        MtGoxTrade mtGoxTrade = JSONUtils.getJsonObject(JSONUtils.getJSONString(rawJSON.get("trade"), objectMapper), MtGoxTrade.class, objectMapper);
+
+        Trade trade = MtGoxAdapters.adaptTrade(mtGoxTrade);
+
+        // Create a ticker event
+        ExchangeEvent tradeEvent = new DefaultExchangeEvent(ExchangeEventType.TRADE, exchangeEvent.getData(), trade);
+        addToEventQueue(tradeEvent);
       } else {
         log.debug("MtGox operational message");
         addToEventQueue(exchangeEvent);

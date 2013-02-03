@@ -22,6 +22,7 @@
 package com.xeiam.xchange.mtgox.v1.service.marketdata.streaming.socketio;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -111,10 +112,18 @@ public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService
 
   private void connectNow(String currency, RunnableExchangeEventListener listener) {
 
-    String url = apiBase + "?Channel=ticker&Currency=" + currency;
-    log.debug("streaming url= " + url);
-
-    connect(url, listener);
+    ArrayList<String> channels = new ArrayList<String>();
+    //channels.add("ticker");
+    channels.add("trades");
+    channels.add("depth");
+    
+    for (String channel:channels) {
+      String url = apiBase + "?Channel=" + channel + "&Currency=" + currency;
+      log.debug("streaming url= " + url);
+      
+      connect(url, listener);
+    }
+    
   }
 
   @Override
