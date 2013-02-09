@@ -1,0 +1,7 @@
+[
+	{"price":"24.42266","type":1,"type_str":"ask","volume":"1.21","price_int":"2442266","volume_int":"121000000","item":"BTC","currency":"USD","now":"1360408814403140","total_volume_int":"363000000"},
+	{"price":"22.76445","type":2,"type_str":"bid","volume":"0.02","price_int":"2276445","volume_int":"2000000","item":"BTC","currency":"USD","now":"1360408815558610","total_volume_int":"2000000"},
+	{"price":"21.99756","type":2,"type_str":"bid","volume":"107.06012562","price_int":"2199756","volume_int":"10706012562","item":"BTC","currency":"USD","now":"1360408816168557","total_volume_int":"10706012562"},
+	{"price":"24.51738","type":1,"type_str":"ask","volume":"-1.21","price_int":"2451738","volume_int":"-121000000","item":"BTC","currency":"USD","now":"1360408817299026","total_volume_int":"0"},
+	{"price":"20.85122","type":2,"type_str":"bid","volume":"-10","price_int":"2085122","volume_int":"-1000000000","item":"BTC","currency":"USD","now":"1360408818459647","total_volume_int":"0"}
+]
