@@ -22,6 +22,7 @@
 package com.xeiam.xchange.mtgox.v1;
 
 import java.math.BigDecimal;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +33,7 @@ import com.xeiam.xchange.currency.Currencies;
 import com.xeiam.xchange.currency.MoneyUtils;
 import com.xeiam.xchange.dto.Order.OrderType;
 import com.xeiam.xchange.dto.account.AccountInfo;
+import com.xeiam.xchange.dto.marketdata.Depth;
 import com.xeiam.xchange.dto.marketdata.Ticker;
 import com.xeiam.xchange.dto.marketdata.Ticker.TickerBuilder;
 import com.xeiam.xchange.dto.marketdata.Trade;
@@ -40,6 +42,7 @@ import com.xeiam.xchange.dto.trade.LimitOrder;
 import com.xeiam.xchange.dto.trade.Wallet;
 import com.xeiam.xchange.mtgox.MtGoxUtils;
 import com.xeiam.xchange.mtgox.v1.dto.account.MtGoxAccountInfo;
+import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxDepthStreaming;
 import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxOrder;
 import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxTicker;
 import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxTrade;
@@ -96,6 +99,30 @@ public final class MtGoxAdapters {
 
   }
 
+  /**
+   * Adapts a MtGoxDepthStreaming to a Depth
+   * 
+   * @param price
+   * @param currency
+   * @param orderTypeString
+   * @return
+   */
+  public static Depth adaptMtGoxDepthStreaming(MtGoxDepthStreaming mtgoxDepth) {
+
+    OrderType orderType = mtgoxDepth.getTypeStr().equalsIgnoreCase("bid") ? OrderType.BID : OrderType.ASK;
+    BigMoney price = MoneyUtils.parse(mtgoxDepth.getCurrency() + " " + mtgoxDepth.getPrice());
+    BigDecimal volume = (new BigDecimal(mtgoxDepth.getVolumeInt()).divide(new BigDecimal(MtGoxUtils.BTC_VOLUME_AND_AMOUNT_INT_2_DECIMAL_FACTOR)));
+    String tradableIdentifier = mtgoxDepth.getItem();
+    String transactionCurrency = mtgoxDepth.getCurrency();
+    long id = mtgoxDepth.getNow();
+    Date timestamp = new Date(id / 1000);
+
+    Depth depth = new Depth(orderType, price, volume, tradableIdentifier, transactionCurrency, id, timestamp);
+
+    return depth;
+
+  }
+  
   /**
    * Adapts a List of MtGoxOrders to a List of LimitOrders
    * 

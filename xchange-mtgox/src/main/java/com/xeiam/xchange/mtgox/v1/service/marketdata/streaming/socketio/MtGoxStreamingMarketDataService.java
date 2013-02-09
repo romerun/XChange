@@ -22,6 +22,7 @@
 package com.xeiam.xchange.mtgox.v1.service.marketdata.streaming.socketio;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -47,16 +48,28 @@ import com.xeiam.xchange.utils.Assert;
  * MtGox provides a SocketIO implementation
  * </p>
  */
-public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService implements StreamingMarketDataService {
 
+public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService implements StreamingMarketDataService {
+  public enum Channel {
+    TICKER {
+      public String toString() { return "ticker"; }
+    },
+    TRADE {
+      public String toString() { return "trades"; }
+    },
+    DEPTH {
+      public String toString() { return "depth"; }
+    },
+  }
+  
   private final Logger log = LoggerFactory.getLogger(MtGoxStreamingMarketDataService.class);
 
   /**
    * Configured from the super class reading of the exchange specification
    */
   private final String apiBase = String.format("http://socketio.%s/mtgox", exchangeSpecification.getHost());
-
-  private final RunnableExchangeEventListener runnableExchangeEventListener;
+  
+  private final ArrayList<Channel> channels;
 
   /**
    * The Ticker queue for the consumer
@@ -72,8 +85,7 @@ public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService
 
     super(exchangeSpecification);
 
-    // Create the listener with the given queues
-    this.runnableExchangeEventListener = new MtGoxRunnableExchangeEventListener(tickerQueue, consumerEventQueue);
+    this.channels = new ArrayList<Channel> ();
 
   }
 
@@ -91,6 +103,10 @@ public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService
 
     verify(tradableIdentifier, currency);
 
+    // Create the listener with the given queues
+    MtGoxRunnableExchangeEventListener runnableExchangeEventListener = new MtGoxRunnableExchangeEventListener(tickerQueue, consumerEventQueue);    
+
+    runnableExchangeEventListener.subscribeCurrency(currency);
     connectNow(currency, runnableExchangeEventListener);
 
     return consumerEventQueue;
@@ -104,6 +120,9 @@ public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService
 
     verify(tradableIdentifier, currency);
 
+    MtGoxRunnableExchangeEventListener runnableExchangeEventListener = new MtGoxRunnableExchangeEventListener(tickerQueue, consumerEventQueue);    
+
+    runnableExchangeEventListener.subscribeCurrency(currency);
     connectNow(currency, runnableExchangeEventListener);
 
     return tickerQueue;
@@ -111,19 +130,12 @@ public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService
   }
 
   private void connectNow(String currency, RunnableExchangeEventListener listener) {
-
-    ArrayList<String> channels = new ArrayList<String>();
-    //channels.add("ticker");
-    channels.add("trades");
-    channels.add("depth");
-    
-    for (String channel:channels) {
+    for (Channel channel: channels) {
       String url = apiBase + "?Channel=" + channel + "&Currency=" + currency;
       log.debug("streaming url= " + url);
       
       connect(url, listener);
     }
-    
   }
 
   @Override
@@ -137,7 +149,7 @@ public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService
 
     return socketIO.isConnected();
   }
-
+  
   /**
    * Verify that the exchange can provide a stream
    * 
@@ -152,4 +164,7 @@ public class MtGoxStreamingMarketDataService extends BaseSocketIOExchangeService
 
   }
 
+  public void subscribe (Channel channel) {
+    channels.add(channel);
+  }
 }

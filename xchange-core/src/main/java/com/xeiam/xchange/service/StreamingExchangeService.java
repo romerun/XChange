@@ -86,6 +86,8 @@ public interface StreamingExchangeService {
    * @param tradableIdentifier An exchange-specific identifier (e.g. "BTC" but can be null)
    * @param currency An exchange-specific currency identifier (e.g. "USD" but can be null)
    * @return A blocking queue
+   * 
+   * Note: This works for only one currency at a time.
    */
   BlockingQueue<ExchangeEvent> getEventQueue(String tradableIdentifier, final String currency);
 

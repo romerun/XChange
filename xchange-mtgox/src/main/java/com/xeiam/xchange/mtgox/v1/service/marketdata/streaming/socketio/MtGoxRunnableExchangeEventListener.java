@@ -21,6 +21,8 @@
  */
 package com.xeiam.xchange.mtgox.v1.service.marketdata.streaming.socketio;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -29,9 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.xeiam.xchange.ExchangeException;
+import com.xeiam.xchange.dto.marketdata.Depth;
 import com.xeiam.xchange.dto.marketdata.Ticker;
 import com.xeiam.xchange.dto.marketdata.Trade;
 import com.xeiam.xchange.mtgox.v1.MtGoxAdapters;
+import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxDepthStreaming;
 import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxTicker;
 import com.xeiam.xchange.mtgox.v1.dto.marketdata.MtGoxTrade;
 import com.xeiam.xchange.rest.JSONUtils;
@@ -57,6 +61,7 @@ public class MtGoxRunnableExchangeEventListener extends RunnableExchangeEventLis
 
   private final BlockingQueue<Ticker> tickerQueue;
   private final BlockingQueue<ExchangeEvent> eventQueue;
+  private final HashMap<String, Boolean> subscribedCurrencies;
 
   /**
    * Constructor
@@ -65,11 +70,16 @@ public class MtGoxRunnableExchangeEventListener extends RunnableExchangeEventLis
    * @param eventQueue The consumer exchange event queue
    */
   public MtGoxRunnableExchangeEventListener(BlockingQueue<Ticker> tickerQueue, BlockingQueue<ExchangeEvent> eventQueue) {
-
     this.tickerQueue = tickerQueue;
     this.eventQueue = eventQueue;
+    
+    subscribedCurrencies = new HashMap<String, Boolean> ();
   }
 
+  public void subscribeCurrency (String currency) {
+    subscribedCurrencies.put(currency, new Boolean(true));
+  }
+  
   @Override
   public void handleEvent(ExchangeEvent exchangeEvent) {
 
@@ -114,8 +124,20 @@ public class MtGoxRunnableExchangeEventListener extends RunnableExchangeEventLis
 
         Trade trade = MtGoxAdapters.adaptTrade(mtGoxTrade);
 
+        // Trade Event from MtGox include all currencies for some reasons
+        if (subscribedCurrencies.containsKey(trade.getTransactionCurrency())) {
+          ExchangeEvent tradeEvent = new DefaultExchangeEvent(ExchangeEventType.TRADE, exchangeEvent.getData(), trade);
+          addToEventQueue(tradeEvent);
+        }
+      } else if (rawJSON.containsKey("depth")) {
+
+        // Get MtGoxTicker from JSON String
+        MtGoxDepthStreaming mtGoxDepth = JSONUtils.getJsonObject(JSONUtils.getJSONString(rawJSON.get("depth"), objectMapper), MtGoxDepthStreaming.class, objectMapper);
+
+        Depth depth = MtGoxAdapters.adaptMtGoxDepthStreaming(mtGoxDepth);
+
         // Create a ticker event
-        ExchangeEvent tradeEvent = new DefaultExchangeEvent(ExchangeEventType.TRADE, exchangeEvent.getData(), trade);
+        ExchangeEvent tradeEvent = new DefaultExchangeEvent(ExchangeEventType.DEPTH, exchangeEvent.getData(), depth);
         addToEventQueue(tradeEvent);
       } else {
         log.debug("MtGox operational message");
